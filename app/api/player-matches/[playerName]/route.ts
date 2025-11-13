@@ -19,8 +19,11 @@ export async function GET(
       context.params?.playerName ?? ''
     );
 
+    // treat prisma as any to avoid Vercel TS typing issues
+    const db = prisma as any;
+
     // read freshness meta
-    let meta = await prisma.playerCacheMeta.findUnique({
+    let meta = await db.playerCacheMeta.findUnique({
       where: { playerName_shard: { playerName, shard } },
     });
 
@@ -29,7 +32,7 @@ export async function GET(
 
     if (force) {
       await refreshPlayerMatches(playerName, { shard, limit });
-      meta = await prisma.playerCacheMeta.findUnique({
+      meta = await db.playerCacheMeta.findUnique({
         where: { playerName_shard: { playerName, shard } },
       });
     } else if (isStale) {
@@ -39,7 +42,7 @@ export async function GET(
       );
     }
 
-    const cached = await prisma.playerMatchCache.findMany({
+    const cached = await db.playerMatchCache.findMany({
       where: { playerName, shard },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -51,7 +54,7 @@ export async function GET(
       limit,
       stale: force ? false : isStale,
       lastFetchedAt: meta?.lastFetchedAt ?? null,
-      matches: cached.map((row) => row.data),
+      matches: cached.map((row: any) => row.data),
     });
   } catch (err: any) {
     console.error('player-matches GET error:', err);
