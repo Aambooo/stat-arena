@@ -69,12 +69,24 @@ model PlayerStat {
 }
 
 model ContactRequest {
-  id          Int      @id @default(autoincrement()) @map("request_id")
-  clientName  String   @map("client_name")
-  clientEmail String   @map("client_email")
-  message     String   @db.Text
-  requestDate DateTime @default(now()) @map("request_date")
-  status      String   @default("pending")
+  id Int @id @default(autoincrement()) @map("request_id")
+
+  // Basic contact info
+  clientName  String  @map("client_name") // brand or company name
+  clientEmail String  @map("client_email")
+  message     String? @db.Text // optional extra notes from client
+
+  // Advertising–specific fields
+  package            String?   @map("package") // e.g. "1-week", "2-weeks", "1-month"
+  paymentMethod      String?   @map("payment_method") // e.g. "eSewa", "Khalti", "Bank"
+  transactionId      String?   @map("transaction_id") // payment reference from client
+  targetUrl          String?   @map("target_url") // sponsor link to open on banner click
+  preferredStartDate DateTime? @map("preferred_start_date")
+
+  // Status & timestamps
+  requestDate DateTime @default(now()) @map("request_date") // when the request was created
+  status      String   @default("pending") // "pending" | "verified" | "rejected"
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("contact_requests")
 }

@@ -15,6 +15,8 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import AirdropViewer from '@/components/AirdropModel';
 import BannerCarousel from '@/components/BannerCarousel';
+import Link from "next/link";
+
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -250,6 +252,19 @@ export default function HomePage() {
       {/* Banner Carousel */}
       <div className="relative z-30 mt-24 mb-12 pointer-events-auto w-full flex justify-center">
         <BannerCarousel />
+      </div>
+
+      {/* Advertise CTA under banner */}
+      <div className="relative z-30 mb-10 pointer-events-auto">
+        <div className="container mx-auto px-4 text-center text-sm text-gray-300">
+          Want your brand featured here?{" "}
+          <Link
+            href="/advertise"
+            className="font-semibold text-yellow-400 hover:text-yellow-300 underline-offset-2 hover:underline"
+          >
+            Advertise with STAT ARENA
+          </Link>
+        </div>
       </div>
 
       {/* Footer */}
