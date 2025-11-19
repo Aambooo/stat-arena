@@ -1,5 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
+
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -43,9 +47,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </Link>
         </nav>
 
-        <div className="px-4 py-3 border-t border-neutral-800 text-xs text-gray-500">
-          Admin tools for managing sponsors &amp; banners.
+        <div className="px-4 py-3 border-t border-neutral-800 flex items-center justify-between text-xs text-gray-500">
+          <span>Admin tools for managing sponsors &amp; banners.</span>
+          <UserButton afterSignOutUrl="/admin/login" />
         </div>
+
       </aside>
 
       {/* MAIN CONTENT */}

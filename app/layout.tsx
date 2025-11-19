@@ -16,13 +16,23 @@ export const metadata: Metadata = {
     "Track your PUBG PC performance with detailed statistics and analytics",
 };
 
+const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+if (!publishableKey) {
+  // This will show a clear error in dev if the env var is missing
+  throw new Error(
+    "Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY. " +
+      "Set it in your .env/.env.local and in Vercel project settings."
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider publishableKey={publishableKey}>
       <html lang="en" className={`${oswald.variable} ${archivoNarrow.variable}`}>
         <body>
           <Providers>{children}</Providers>

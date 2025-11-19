@@ -1,14 +1,18 @@
-// middleware.ts
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Routes that do NOT require login
 const isPublicRoute = createRouteMatcher([
-  "/",                // homepage
-  "/player(.*)",      // player pages
-  "/team(.*)",        // team pages
-  "/advertise(.*)",   // advertise page
-  "/admin/login(.*)", // admin login (must stay public)
-  "/api(.*)",         // api routes (public for now)
+  "/",                
+  "/player(.*)",      
+  "/team(.*)",        
+  "/advertise(.*)",   
+  
+  // Auth routes MUST be public for Google OAuth to work
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/sso-callback(.*)",
+
+  "/admin/login(.*)",  
+  "/api(.*)",           
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

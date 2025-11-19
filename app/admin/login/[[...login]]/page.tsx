@@ -1,8 +1,20 @@
 "use client";
 
-import { SignIn } from "@clerk/nextjs";
+import { SignIn, useUser } from "@clerk/nextjs";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
+  const { isSignedIn } = useUser();
+  const router = useRouter();
+
+  // If already logged in → instantly go to /admin
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/admin");
+    }
+  }, [isSignedIn]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-950 p-6">
       <div className="rounded-xl bg-neutral-900/50 border border-neutral-800 p-6 shadow-xl max-w-md w-full">
@@ -15,6 +27,7 @@ export default function AdminLoginPage() {
           routing="path"
           afterSignInUrl="/admin"
           afterSignUpUrl="/admin"
+          signUpUrl="/admin/login"
         />
       </div>
     </div>
