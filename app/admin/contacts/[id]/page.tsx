@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 type ContactDetailPageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 // SERVER ACTION: update status in DB
@@ -47,9 +47,8 @@ async function deleteContact(formData: FormData) {
   redirect("/admin/contacts");
 }
 
-export default async function ContactDetailPage({
-  params,
-}: ContactDetailPageProps) {
+export default async function ContactDetailPage(props: ContactDetailPageProps) {
+  const params = await props.params;
   const id = Number(params.id);
 
   if (Number.isNaN(id)) {
