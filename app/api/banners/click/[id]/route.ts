@@ -1,39 +1,34 @@
-// app/api/banners/click/[id]/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-type RouteParams = {
-  params: { id: string };
-};
+export async function GET(
+  req: NextRequest,
+  props: { params: Promise<{ id: string }> }
+) {
+  // Next.js 15: params is now a Promise
+  const { id } = await props.params;
 
-export async function GET(_req: Request, { params }: RouteParams) {
-  const id = Number(params.id);
-
-  if (!id || Number.isNaN(id)) {
-    return NextResponse.json({ error: "Invalid banner id" }, { status: 400 });
+  const numericId = Number(id);
+  if (Number.isNaN(numericId)) {
+    // if id is not a number, just send user to home
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // Find banner first
   const banner = await db.banner.findUnique({
-    where: { id },
+    where: { id: numericId },
   });
 
-  if (!banner) {
-    return NextResponse.json({ error: "Banner not found" }, { status: 404 });
+  if (!banner?.redirectUrl) {
+    // if no redirect URL for some reason, send to home
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // Increment clicks (we don't really care about the result here)
+  // increment clicks
   await db.banner.update({
-    where: { id },
-    data: {
-      clicks: {
-        increment: 1,
-      },
-    },
+    where: { id: numericId },
+    data: { clicks: { increment: 1 } },
   });
 
-  // Redirect user to the sponsor site
-  return NextResponse.redirect(banner.redirectUrl, {
-    status: 302,
-  });
+  // finally redirect to sponsor site
+  return NextResponse.redirect(banner.redirectUrl);
 }
