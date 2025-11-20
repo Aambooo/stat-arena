@@ -1,34 +1,32 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+// app/api/banners/active/route.ts
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
 
 export async function GET() {
   try {
     const now = new Date();
 
-    const banners = await prisma.banner.findMany({
+    // Only banners where: startDate <= now <= endDate
+    const activeBanners = await db.banner.findMany({
       where: {
-        startDate: { lte: now },
-        endDate:   { gte: now },
+        startDate: {
+          lte: now,
+        },
+        endDate: {
+          gte: now,
+        },
       },
       orderBy: {
-        startDate: 'asc',
+        startDate: "desc",
       },
     });
 
-    // Just return exactly what’s in the DB – no defaults, no overrides
-    return NextResponse.json({
-      banners: banners.map((b) => ({
-        id: b.id,
-        title: b.title,
-        imageUrl: b.imageUrl,
-        redirectUrl: b.redirectUrl,
-        startDate: b.startDate,
-        endDate: b.endDate,
-        clicks: b.clicks,
-      })),
-    });
+    return NextResponse.json(activeBanners);
   } catch (error) {
-    console.error('Error loading active banners:', error);
-    return NextResponse.json({ banners: [], error: 'Failed to load banners' }, { status: 500 });
+    console.error("[GET /api/banners/active] error:", error);
+    return NextResponse.json(
+      { error: "Failed to load active banners" },
+      { status: 500 }
+    );
   }
 }

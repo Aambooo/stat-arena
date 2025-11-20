@@ -33,3 +33,13 @@ body {
 .animate-slow-zoom {
   animation: slow-zoom 10s ease-in-out infinite alternate;
 }
+/* Fix datetime-local icon color for dark themes */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);  /* turns black icons white */
+  opacity: 1;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  cursor: pointer;
+}
+

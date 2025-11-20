@@ -19,12 +19,12 @@ export default function BannerCarousel() {
     (async () => {
       try {
         const res = await fetch('/api/banners/active', { cache: 'no-store' });
-        if (res.ok) {
-          const json = await res.json();
-          setBanners(json.banners ?? []);
-        } else {
+        if (!res.ok) {
           console.error('Failed to load banners', res.status);
+          return;
         }
+        const data: Banner[] = await res.json();
+        setBanners(data ?? []);
       } catch (err) {
         console.error('Error loading banners', err);
       } finally {
@@ -33,7 +33,7 @@ export default function BannerCarousel() {
     })();
   }, []);
 
-  // Auto-rotate every 5 seconds
+  // Auto-rotate every 8 seconds
   useEffect(() => {
     if (!banners.length) return;
     const id = setInterval(() => {
@@ -71,8 +71,6 @@ export default function BannerCarousel() {
     );
   }
 
-  const banner = banners[current];
-
   const next = () => setCurrent((prev) => (prev + 1) % banners.length);
   const prev = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
@@ -82,32 +80,41 @@ export default function BannerCarousel() {
         {/* Left arrow */}
         <button
           onClick={prev}
-          className="absolute left-2 md:left-4 z-10 rounded-full bg-black/60 hover:bg-black/80 text-white w-8 h-8 flex items-center justify-center text-lg"
+          className="absolute left-2 md:left-4 z-20 rounded-full bg-black/60 hover:bg-black/80 text-white w-8 h-8 flex items-center justify-center text-lg"
         >
           ‹
         </button>
 
-        {/* Whole banner clickable */}
-        <a
-          href={banner.redirectUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="block w-full no-underline"
-        >
-          <div className="relative w-full h-40 md:h-56 lg:h-64 overflow-hidden rounded-xl bg-black border border-neutral-700">
-            {/* Show full image (no cut-off) */}
-            <img
-              src={banner.imageUrl}
-              alt={banner.title}
-              className="w-full h-full object-contain bg-black"
-            />
+        {/* Slider track */}
+        <div className="w-full overflow-hidden">
+          <div
+            className="flex h-40 md:h-56 lg:h-64 rounded-xl bg-black border border-neutral-700 transition-transform duration-[3500ms] ease-in-out"
+            style={{ transform: `translateX(-${current * 100}%)` }}
+          >
+            {banners.map((banner) => (
+              <a
+                key={banner.id}
+                href={`/api/banners/click/${banner.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="block min-w-full h-full flex-shrink-0 no-underline"
+              >
+                <div className="relative w-full h-full">
+                  <img
+                    src={banner.imageUrl}
+                    alt={banner.title}
+                    className="w-full h-full object-contain bg-black"
+                  />
+                </div>
+              </a>
+            ))}
           </div>
-        </a>
+        </div>
 
         {/* Right arrow */}
         <button
           onClick={next}
-          className="absolute right-2 md:right-4 z-10 rounded-full bg-black/60 hover:bg-black/80 text-white w-8 h-8 flex items-center justify-center text-lg"
+          className="absolute right-2 md:right-4 z-20 rounded-full bg-black/60 hover:bg-black/80 text-white w-8 h-8 flex items-center justify-center text-lg"
         >
           ›
         </button>
