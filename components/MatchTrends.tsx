@@ -72,16 +72,14 @@ export default function MatchTrends({
   // ----- helpers -----
   const fetchCached = async () => {
     const res = await fetch(
-      `/api/player-matches/${encodeURIComponent(playerName)}?limit=${limit}`,
-      { cache: 'no-store' }
+      `/api/player-matches/${encodeURIComponent(playerName)}?limit=${limit}`
     );
     return (await res.json()) as ApiResp;
   };
 
   const fetchWithRefresh = async () => {
     const res = await fetch(
-      `/api/player-matches/${encodeURIComponent(playerName)}?limit=${limit}&refresh=1`,
-      { cache: 'no-store' }
+      `/api/player-matches/${encodeURIComponent(playerName)}?limit=${limit}&refresh=1`
     );
     return (await res.json()) as ApiResp;
   };
@@ -110,7 +108,7 @@ export default function MatchTrends({
           setWarming(false);
         }
       }
-    }, 10_000);
+    }, 30_000);
   };
 
   // ----- initial load -----
@@ -157,7 +155,7 @@ export default function MatchTrends({
         const adr =
           s.timeSurvived > 0 ? +(s.damage / (s.timeSurvived / 60)).toFixed(1) : 0; // dmg/min
         const label = s.createdAt
-          ? new Date(s.createdAt).toLocaleString(undefined, { timeZone: 'Asia/Kathmandu' })
+          ? new Date(s.createdAt).toLocaleString("en-GB", { timeZone: 'Asia/Kathmandu' })
           : `#${idx + 1}`;
         return {
           idx: idx + 1,

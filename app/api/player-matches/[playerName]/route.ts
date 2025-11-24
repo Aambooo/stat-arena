@@ -48,14 +48,21 @@ export async function GET(
       take: limit,
     });
 
-    return NextResponse.json({
-      playerName,
-      shard,
-      limit,
-      stale: force ? false : isStale,
-      lastFetchedAt: meta?.lastFetchedAt ?? null,
-      matches: cached.map((row: any) => row.data),
-    });
+    const headers = new Headers();
+    headers.set("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+    headers.set("X-Cache-Control", "enabled");
+
+    return NextResponse.json(
+      {
+        playerName,
+        shard,
+        limit,
+        stale: force ? false : isStale,
+        lastFetchedAt: meta?.lastFetchedAt ?? null,
+        matches: cached.map((row: any) => row.data),
+      },
+      { status: 200, headers }
+    );
   } catch (err: any) {
     console.error('player-matches GET error:', err);
     return NextResponse.json(

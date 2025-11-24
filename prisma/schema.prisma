@@ -125,3 +125,16 @@ model PlayerMatchCache {
   @@index([playerName, shard, createdAt])
   @@map("player_match_cache")
 }
+
+model SeasonStatsCache {
+  id        Int      @id @default(autoincrement())
+  playerId  String
+  platform  String
+  seasonId  String
+  data      Json
+  fetchedAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@unique([playerId, platform, seasonId], name: "season_stats_cache_key")
+  @@map("season_stats_cache")
+}

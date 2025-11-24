@@ -4,6 +4,9 @@ import { db } from "@/lib/db";
 import type { ContactRequest } from "@prisma/client";
 import ContactsTable from "./ContactsTable";
 
+export const revalidate = 30;
+
+
 export default async function AdminContactsPage() {
   const allRequests: ContactRequest[] = await db.contactRequest.findMany({
     orderBy: { requestDate: "desc" },

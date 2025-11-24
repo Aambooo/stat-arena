@@ -59,10 +59,10 @@ export default async function PlayerPage({
           {/* Back Button */}
           <a
             href="/"
-            className="inline-flex items-center gap-2 text-yellow-500 hover:text-yellow-400 mb-6 transition-colors"
+            className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors mb-6"
           >
             <span>←</span>
-            <span>Back to Home</span>
+            <span className="ml-1">Back to Home</span>
           </a>
 
           {/* Header */}
@@ -95,7 +95,9 @@ export default async function PlayerPage({
                 <div>
                   <p className="text-gray-400">Clan ID</p>
                   <a
-                    href={`/team/${playerData.clanId}`}
+                    href={`/team/${playerData.clanId}?from=${encodeURIComponent(
+                      `/player/${playerData.name}`
+                    )}`}
                     className="text-yellow-500 hover:text-yellow-400 text-xl font-semibold underline transition-colors"
                   >
                     View Team →
@@ -143,10 +145,10 @@ export default async function PlayerPage({
           <p className="text-gray-400 text-sm">{error.message}</p>
           <a
             href="/"
-            className="inline-flex items-center gap-2 text-yellow-500 hover:text-yellow-400 mt-6 transition-colors"
+            className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors mb-6"
           >
             <span>←</span>
-            <span>Back to Home</span>
+            <span className="ml-1">Back to Home</span>
           </a>
         </div>
       </div>

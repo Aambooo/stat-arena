@@ -5,10 +5,13 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import type { Banner } from "@prisma/client";
 import { supabaseServer } from "@/lib/supabaseServer";
+import BannerToast from "../BannerToast";
+
 
 
 type BannerDetailPageProps = {
-   params: Promise<{ id: string }>;
+  params: { id: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 // Helper: format for datetime-local input
@@ -83,6 +86,8 @@ async function updateBanner(formData: FormData) {
 
   revalidatePath(`/admin/banners/${id}`);
   revalidatePath("/admin/banners");
+
+  redirect(`/admin/banners/${id}?toast=updated`);
 }
 
 // SERVER ACTION: delete banner
@@ -174,14 +179,17 @@ async function uploadBannerImage(formData: FormData) {
   // 4) Revalidate pages
   revalidatePath(`/admin/banners/${id}`);
   revalidatePath("/admin/banners");
+
+  redirect(`/admin/banners/${id}?toast=updated`);
 }
 
 
 
 export default async function BannerDetailPage({
   params,
+  searchParams,
 }: BannerDetailPageProps) {
-  const { id: idParam } = await params;
+  const { id: idParam } = params;
   const id = Number(idParam);
 
   if (Number.isNaN(id)) {
@@ -200,8 +208,19 @@ export default async function BannerDetailPage({
   const endDefault = toLocalInputValue(banner.endDate);
   const status = getBannerStatus(banner);
 
+  const toastParam = searchParams?.toast;
+  const toastType =
+    toastParam === "updated"
+      ? "updated"
+      : toastParam === "created"
+      ? "created"
+      : undefined;
+
   return (
     <div className="space-y-6">
+      {/* ✅ Toast for update / image upload */}
+      <BannerToast type={toastType} />
+      
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-wide text-gray-500">
           Banner #{banner.id}
@@ -226,7 +245,7 @@ export default async function BannerDetailPage({
         <div className="pt-2">
           <Link
             href="/admin/banners"
-            className="text-xs text-gray-400 hover:text-yellow-300 underline decoration-dotted"
+            className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors"
           >
             ← Back to banners list
           </Link>
@@ -324,7 +343,7 @@ export default async function BannerDetailPage({
           <div className="pt-2">
             <button
               type="submit"
-              className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors"
+              className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors cursor-pointer"
             >
               Save changes
             </button>
@@ -407,13 +426,13 @@ export default async function BannerDetailPage({
             type="file"
             name="file"
             accept="image/*"
-            className="w-full text-xs text-gray-200 file:mr-3 file:rounded-md file:border-0 file:bg-yellow-500 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-black hover:file:bg-yellow-400"
+            className="w-full cursor-pointer text-xs text-gray-200 file:mr-3 file:rounded-md file:border-0 file:bg-yellow-500 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-black file:cursor-pointer hover:file:bg-yellow-400"
             required
           />
 
           <button
             type="submit"
-            className="self-start rounded-md border border-yellow-500/70 bg-yellow-500 px-3 py-1 font-semibold text-xs text-black hover:bg-yellow-400"
+            className="self-start rounded-md border border-yellow-500/70 bg-yellow-500 px-3 py-1 font-semibold text-xs text-black hover:bg-yellow-400 cursor-pointer"
           >
             Upload &amp; replace image
           </button>
@@ -440,7 +459,7 @@ export default async function BannerDetailPage({
           </p>
           <button
             type="submit"
-            className="inline-flex items-center rounded-md border border-red-500/80 bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500"
+            className="inline-flex items-center rounded-md border border-red-500/80 bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500 cursor-pointer"
           >
             Delete banner
           </button>

@@ -16,10 +16,17 @@ export async function GET(request: Request) {
 
     const matchData = await getMatchDetails(matchId, shard);
 
-    return NextResponse.json({
-      success: true,
-      data: matchData
-    });
+    const headers = new Headers();
+    headers.set("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+    headers.set("X-Cache-Control", "enabled");
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: matchData
+      },
+      { status: 200, headers }
+    );
 
   } catch (error: any) {
     return NextResponse.json({

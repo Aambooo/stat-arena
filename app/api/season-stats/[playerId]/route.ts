@@ -1,32 +1,28 @@
 // app/api/season-stats/[playerId]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentSeasonId, getPlayerSeasonStats } from '@/lib/pubg-api';
+import { NextRequest, NextResponse } from "next/server";
+import { getOrRefreshSeasonStats } from "@/lib/cache/refreshSeasonStats";
 
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
-    const shard = url.searchParams.get('shard') ?? 'steam';
+    const shard = url.searchParams.get("shard") ?? "steam";
+    const forceRefresh = url.searchParams.get("refresh") === "1";
 
     // Extract [playerId] from the path: /api/season-stats/<playerId>
-    const segments = req.nextUrl.pathname.split('/');
-    const playerIdSlug = segments[segments.length - 1] || '';
+    const segments = req.nextUrl.pathname.split("/");
+    const playerIdSlug = segments[segments.length - 1] || "";
     const playerId = decodeURIComponent(playerIdSlug);
 
-    // 1) which season is current?
-    const seasonId = await getCurrentSeasonId(shard);
-    if (!seasonId) {
-      return NextResponse.json(
-        { error: 'No current season found' },
-        { status: 404 }
-      );
-    }
+    // 1) Use our cache helper instead of calling PUBG directly
+    const { data: raw, fromCache } = await getOrRefreshSeasonStats({
+      playerId,
+      platform: shard,
+      forceRefresh,
+    });
 
-    // 2) pull raw season stats
-    const raw = await getPlayerSeasonStats(playerId, shard, seasonId);
-
-    // 3) shape per-mode stats
+    // 2) shape per-mode stats (same logic as before)
     const s = raw?.data?.attributes?.gameModeStats ?? {};
-    const modes = ['solo', 'duo', 'squad'] as const;
+    const modes = ["solo", "duo", "squad"] as const;
 
     const shaped = Object.fromEntries(
       modes.map((m) => {
@@ -39,19 +35,21 @@ export async function GET(req: NextRequest) {
         const assists = Number(g.assists ?? 0);
 
         const deaths = Math.max(0, rounds - wins); // approximation
-        const kd = deaths > 0 ? +(kills / deaths).toFixed(2) : kills > 0 ? kills : 0;
+        const kd =
+          deaths > 0 ? +(kills / deaths).toFixed(2) : kills > 0 ? kills : 0;
         const adr = rounds > 0 ? +(damage / rounds).toFixed(1) : 0;
-        const winRate = rounds > 0 ? +((wins / rounds) * 100).toFixed(1) : 0;
+        const winRate =
+          rounds > 0 ? +((wins / rounds) * 100).toFixed(1) : 0;
 
         return [
           m,
           {
             roundsPlayed: rounds,
             wins,
-            winRate,      // %
+            winRate, // %
             kills,
-            kd,           // approx K/D
-            adr,          // avg damage / round
+            kd, // approx K/D
+            adr, // avg damage / round
             top10s,
             assists,
             damageDealt: damage,
@@ -60,17 +58,31 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    return NextResponse.json({
-      playerId,
-      shard,
-      seasonId,
-      updatedAt: new Date().toISOString(),
-      modes: shaped,
-    });
-  } catch (err) {
-    console.error('season-stats error:', err);
+    // Try to recover seasonId from the API response
+    const seasonId =
+      raw?.data?.relationships?.season?.data?.id ?? "current";
+
+    const headers = new Headers();
+    headers.set("X-Cache", fromCache ? "HIT" : "MISS");
+    headers.set(
+      "Cache-Control",
+      "public, max-age=30, stale-while-revalidate=60"
+    );
+
     return NextResponse.json(
-      { error: 'Failed to fetch season stats' },
+      {
+        playerId,
+        shard,
+        seasonId,
+        updatedAt: new Date().toISOString(),
+        modes: shaped,
+      },
+      { status: 200, headers }
+    );
+  } catch (err: any) {
+    console.error("season-stats error:", err);
+    return NextResponse.json(
+      { error: "Failed to fetch season stats",details: String(err?.message ?? err), },
       { status: 500 }
     );
   }

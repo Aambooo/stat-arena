@@ -18,7 +18,7 @@ export default function BannerCarousel() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/banners/active', { cache: 'no-store' });
+        const res = await fetch('/api/banners/active');
         if (!res.ok) {
           console.error('Failed to load banners', res.status);
           return;
@@ -94,7 +94,7 @@ export default function BannerCarousel() {
             {banners.map((banner) => (
               <a
                 key={banner.id}
-                href={`/api/banners/click/${banner.id}`}
+                href={banner.redirectUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="block min-w-full h-full flex-shrink-0 no-underline"

@@ -163,7 +163,7 @@ export default async function ContactDetailPage(props: ContactDetailPageProps) {
 
             <button
               type="submit"
-              className="rounded-md bg-yellow-500 px-3 py-1 font-semibold text-xs text-black hover:bg-yellow-400 transition-colors"
+              className="rounded-md bg-yellow-500 px-3 py-1 font-semibold text-xs text-black hover:bg-yellow-400 transition-colors cursor-pointer"
             >
               Save
             </button>
@@ -195,7 +195,7 @@ export default async function ContactDetailPage(props: ContactDetailPageProps) {
               <input type="hidden" name="id" value={req.id} />
               <button
                 type="submit"
-                className="rounded-md bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-500 transition-colors"
+                className="rounded-md bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-500 transition-colors cursor-pointer"
               >
                 Delete contact request
               </button>

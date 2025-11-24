@@ -23,7 +23,7 @@ type ApiResp = {
 
 function fmt(dt?: string) {
   if (!dt) return '';
-  return new Date(dt).toLocaleString(undefined, {
+  return new Date(dt).toLocaleString("en-GB", {
     timeZone: 'Asia/Kathmandu',
     year: 'numeric',
     month: '2-digit',
@@ -78,7 +78,7 @@ export default function PlayerMatches({
         playerName
       )}?limit=${limit}${refresh ? '&refresh=1' : ''}`;
 
-      const res = await fetch(url, { cache: 'no-store' });
+      const res = await fetch(url);
 
       if (!res.ok) {
         const text = await res.text().catch(() => '');

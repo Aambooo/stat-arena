@@ -80,7 +80,7 @@ async function createBanner(formData: FormData) {
   });
 
   revalidatePath("/admin/banners");
-  redirect(`/admin/banners/${newBanner.id}`);
+  redirect(`/admin/banners/${newBanner.id}?toast=created`);
 }
 
 
@@ -108,7 +108,7 @@ export default function NewBannerPage() {
         <div className="pt-2">
           <Link
             href="/admin/banners"
-            className="text-xs text-gray-400 hover:text-yellow-300 underline decoration-dotted"
+            className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors"
           >
             ← Back to banners list
           </Link>

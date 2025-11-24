@@ -39,7 +39,9 @@ export default function SeasonStats({ playerId, shard = 'steam' }: { playerId: s
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`/api/season-stats/${encodeURIComponent(playerId)}?shard=${shard}`, { cache: 'no-store' });
+        const res = await fetch(
+          `/api/season-stats/${encodeURIComponent(playerId)}?shard=${shard}`
+        );
         const json = (await res.json()) as ApiResp;
         setData(json);
       } catch (e) {

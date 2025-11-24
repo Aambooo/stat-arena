@@ -4,14 +4,32 @@ export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import type { Banner } from "@prisma/client";
 import BannersTable from "./BannersTable";
+import BannerToast from "./BannerToast";
 
-export default async function AdminBannersPage() {
+export const revalidate = 30;
+
+type BannersPageProps = {
+  searchParams?: { [key: string]: string | string[] | undefined };
+};
+
+export default async function AdminBannersPage({ searchParams }: BannersPageProps) {
   const allBanners: Banner[] = await db.banner.findMany({
     orderBy: { startDate: "desc" },
   });
 
+  const toastParam = searchParams?.toast;
+  const toastType =
+    toastParam === "created"
+      ? "created"
+      : toastParam === "updated"
+      ? "updated"
+      : undefined;
+
   return (
     <div className="space-y-6">
+      {/* 👇 Toast lives here, above content */}
+      <BannerToast type={toastType} />
+
       <header className="space-y-2">
         <h1 className="text-2xl font-bold text-yellow-400">Banners</h1>
         <p className="text-sm text-gray-400">

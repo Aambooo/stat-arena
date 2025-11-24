@@ -5,10 +5,16 @@ interface TeamPageProps {
   params: Promise<{
     teamId: string;
   }>;
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default async function TeamPage({ params }: TeamPageProps) {
+export default async function TeamPage({ params, searchParams }: TeamPageProps) {
   const { teamId } = await params;
+
+  // Decide where the back button should go
+  const fromParam = typeof searchParams?.from === "string" ? searchParams.from : undefined;
+  const backHref = fromParam || "/";
+  const backLabel = fromParam ? "Back to player" : "Back to Home";
   
   try {
     // Fetch clan information
@@ -44,12 +50,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
         {/* Content wrapper */}
         <div className="relative z-10 max-w-7xl mx-auto pt-24 px-8 pb-20">
           {/* Back Button */}
-          <a 
-            href="/"
-            className="inline-flex items-center gap-2 text-yellow-500 hover:text-yellow-400 mb-6 transition-colors"
+          <a
+            href={backHref}
+            className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors mb-6"
           >
             <span>←</span>
-            <span>Back to Home</span>
+            <span className="ml-1">{backLabel}</span>
           </a>
 
           {/* Team Header */}
@@ -109,10 +115,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
           <p className="text-gray-400 text-sm">{error.message}</p>
           <a 
             href="/"
-            className="inline-flex items-center gap-2 text-yellow-500 hover:text-yellow-400 mt-6 transition-colors"
+            className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors mb-6"
           >
             <span>←</span>
-            <span>Back to Home</span>
+            <span className="ml-1">Back to Home</span>
           </a>
         </div>
       </div>
