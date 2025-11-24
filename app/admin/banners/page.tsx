@@ -9,21 +9,26 @@ import BannerToast from "./BannerToast";
 export const revalidate = 30;
 
 type BannersPageProps = {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export default async function AdminBannersPage({ searchParams }: BannersPageProps) {
-  const allBanners: Banner[] = await db.banner.findMany({
-    orderBy: { startDate: "desc" },
-  });
+  // 🚀 FIX — searchParams is a Promise in Next.js 15
+  const resolved = searchParams ? await searchParams : undefined;
 
-  const toastParam = searchParams?.toast;
+  const rawToast = resolved?.toast;
+  const toastParam = Array.isArray(rawToast) ? rawToast[0] : rawToast;
+
   const toastType =
     toastParam === "created"
       ? "created"
       : toastParam === "updated"
       ? "updated"
       : undefined;
+
+  const allBanners: Banner[] = await db.banner.findMany({
+    orderBy: { startDate: "desc" },
+  });
 
   return (
     <div className="space-y-6">
