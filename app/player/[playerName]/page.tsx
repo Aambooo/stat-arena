@@ -1,11 +1,58 @@
-import { searchPlayer } from '@/lib/pubg-api';
-import { notFound } from 'next/navigation';
-import PlayerMatches from '@/components/PlayerMatches';
-import SeasonStats from '@/components/SeasonStats';
-import MatchTrends from '@/components/MatchTrends';
+import { searchPlayer } from "@/lib/pubg-api";
+import PlayerMatches from "@/components/PlayerMatches";
+import SeasonStats from "@/components/SeasonStats";
+import MatchTrends from "@/components/MatchTrends";
 
 // In Next.js 15, params is a *Promise*.
 type PlayerPageParams = Promise<{ playerName: string }>;
+
+type PlayerNotFoundProps = {
+  playerName: string;
+};
+
+function PlayerNotFound({ playerName }: PlayerNotFoundProps) {
+  return (
+    <div className="relative min-h-screen bg-neutral-950 flex items-center justify-center p-8 overflow-hidden">
+      {/* background pattern */}
+      <div className="absolute inset-0 opacity-20 z-0">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 2px 2px, rgb(115, 115, 115) 1px, transparent 0)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+      </div>
+
+      <div className="relative z-10 bg-neutral-900/80 backdrop-blur-xl rounded-xl p-8 border border-neutral-700 max-w-md w-full">
+        <h1 className="text-3xl font-bold text-white mb-3">
+          Player not found
+        </h1>
+        <p className="text-gray-300 mb-2">
+          We couldn&apos;t find any PUBG player with the name{" "}
+          <span className="font-semibold text-yellow-400 break-all">
+            {playerName}
+          </span>
+          .
+        </p>
+        <p className="text-gray-400 text-sm mb-6">
+          Check the spelling, make sure you&apos;re using the in-game name, and
+          try again. Currently this site searches on the{" "}
+          <span className="font-mono">steam</span> platform.
+        </p>
+
+        <a
+          href="/"
+          className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors"
+        >
+          <span>←</span>
+          <span className="ml-1">Back to Home</span>
+        </a>
+      </div>
+    </div>
+  );
+}
 
 export default async function PlayerPage({
   params,
@@ -14,14 +61,15 @@ export default async function PlayerPage({
 }) {
   // Await the params to get the actual value
   const { playerName } = await params;
+  
 
   try {
     // Search for the player
-    const result = await searchPlayer(playerName, 'steam');
+    const result = await searchPlayer(playerName, "steam");
 
-    // Check if player was found
+    // If API succeeded but returned no players, show clean "not found" UI
     if (!result.data || result.data.length === 0) {
-      notFound();
+      return <PlayerNotFound playerName={playerName} />;
     }
 
     const player = result.data[0];
@@ -48,8 +96,8 @@ export default async function PlayerPage({
             className="absolute inset-0"
             style={{
               backgroundImage:
-                'radial-gradient(circle at 2px 2px, rgb(115, 115, 115) 1px, transparent 0)',
-              backgroundSize: '40px 40px',
+                "radial-gradient(circle at 2px 2px, rgb(115, 115, 115) 1px, transparent 0)",
+              backgroundSize: "40px 40px",
             }}
           />
         </div>
@@ -125,6 +173,18 @@ export default async function PlayerPage({
       </div>
     );
   } catch (error: any) {
+    const message = typeof error?.message === "string" ? error.message : "";
+
+    const isNotFoundError =
+      message.includes("404 Not Found") ||
+      message.includes("No Players Found Matching Criteria");
+
+    // If API threw a 404-style error, show the same clean "not found" UI
+    if (isNotFoundError) {
+      return <PlayerNotFound playerName={playerName} />;
+    }
+
+    // Fallback: generic error card without raw JSON
     return (
       <div className="relative min-h-screen bg-neutral-950 flex items-center justify-center p-8 overflow-hidden">
         {/* Animated background pattern for error page too */}
@@ -133,16 +193,21 @@ export default async function PlayerPage({
             className="absolute inset-0"
             style={{
               backgroundImage:
-                'radial-gradient(circle at 2px 2px, rgb(115, 115, 115) 1px, transparent 0)',
-              backgroundSize: '40px 40px',
+                "radial-gradient(circle at 2px 2px, rgb(115, 115, 115) 1px, transparent 0)",
+              backgroundSize: "40px 40px",
             }}
           />
         </div>
 
         <div className="relative z-10 bg-red-500/10 backdrop-blur-xl rounded-xl p-8 border border-red-500/20 max-w-md">
           <h1 className="text-3xl font-bold text-red-500 mb-4">Error</h1>
-          <p className="text-white mb-2">Failed to fetch player data.</p>
-          <p className="text-gray-400 text-sm">{error.message}</p>
+          <p className="text-white mb-2">
+            Something went wrong while fetching player data.
+          </p>
+          <p className="text-gray-400 text-sm mb-6">
+            Please try again in a moment. If this keeps happening, the PUBG API
+            might be temporarily unavailable.
+          </p>
           <a
             href="/"
             className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors mb-6"
