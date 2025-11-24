@@ -23,7 +23,7 @@ export default async function TeamPage({ params, searchParams }: TeamPageProps) 
 
   const backHref = fromParam || "/";
   const backLabel = fromParam ? "Back to player" : "Back to Home";
-  
+
   try {
     // Fetch clan information
     const result = await getClanInfo(teamId, 'steam');
@@ -121,12 +121,12 @@ export default async function TeamPage({ params, searchParams }: TeamPageProps) 
           <h1 className="text-3xl font-bold text-red-500 mb-4">Error</h1>
           <p className="text-white mb-2">Failed to fetch clan data.</p>
           <p className="text-gray-400 text-sm">{error.message}</p>
-          <a 
-            href="/"
+          <a
+            href={backHref}
             className="inline-flex items-center rounded-md bg-yellow-500 px-4 py-2 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors mb-6"
           >
             <span>←</span>
-            <span className="ml-1">Back to Home</span>
+            <span className="ml-1">{backLabel}</span>
           </a>
         </div>
       </div>
