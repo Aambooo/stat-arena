@@ -5,14 +5,22 @@ interface TeamPageProps {
   params: Promise<{
     teamId: string;
   }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
+
 
 export default async function TeamPage({ params, searchParams }: TeamPageProps) {
   const { teamId } = await params;
 
-  // Decide where the back button should go
-  const fromParam = typeof searchParams?.from === "string" ? searchParams.from : undefined;
+  // ✅ Next 15: searchParams is also a Promise
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+
+  // This reads ?from=... if present (for “Back to player” behavior)
+  const fromParam =
+    typeof resolvedSearchParams?.from === "string"
+      ? resolvedSearchParams.from
+      : undefined;
+
   const backHref = fromParam || "/";
   const backLabel = fromParam ? "Back to player" : "Back to Home";
   
