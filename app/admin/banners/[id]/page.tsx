@@ -11,8 +11,9 @@ import BannerToast from "../BannerToast";
 
 type BannerDetailPageProps = {
   params: Promise<{ id: string }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
+
 
 // Helper: format for datetime-local input
 function toLocalInputValue(date: Date | null): string {
@@ -208,7 +209,14 @@ export default async function BannerDetailPage({
   const endDefault = toLocalInputValue(banner.endDate);
   const status = getBannerStatus(banner);
 
-  const toastParam = searchParams?.toast;
+  // ✅ Next.js 15: searchParams is a Promise as well
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const rawToast = resolvedSearchParams?.toast;
+
+  // If toast is an array, take the first value
+  const toastParam =
+    Array.isArray(rawToast) ? rawToast[0] : (rawToast as string | undefined);
+
   const toastType =
     toastParam === "updated"
       ? "updated"
