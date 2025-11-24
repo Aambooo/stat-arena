@@ -10,7 +10,7 @@ import BannerToast from "../BannerToast";
 
 
 type BannerDetailPageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
   searchParams?: { [key: string]: string | string[] | undefined };
 };
 
@@ -189,7 +189,7 @@ export default async function BannerDetailPage({
   params,
   searchParams,
 }: BannerDetailPageProps) {
-  const { id: idParam } = params;
+  const { id: idParam } = await params;
   const id = Number(idParam);
 
   if (Number.isNaN(id)) {
