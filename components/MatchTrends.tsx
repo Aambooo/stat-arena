@@ -180,8 +180,14 @@ export default function MatchTrends({
   const metricLabel = {
     kills: 'Kills',
     damage: 'Damage',
-    adr: 'ADR (Damage per Min)',
-  };
+    adr: 'ADR',
+  } as const;
+
+  const metricDescription = {
+    kills: 'Kills per match',
+    damage: 'Total damage per match',
+    adr: 'ADR (Damage per Minute)',
+  } as const;
 
   // ---- summary numbers for the current metric ----
   const values = rows.map((r) => r[metric] as number);
@@ -261,10 +267,10 @@ export default function MatchTrends({
 
   return (
     <div className="rounded-xl border border-neutral-800 p-6">
-      <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
         <h2 className="text-xl font-bold text-white">Match Trends (last {limit})</h2>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Download */}
           <button
             onClick={downloadCSV}
@@ -279,6 +285,7 @@ export default function MatchTrends({
             <button
               key={m}
               onClick={() => setMetric(m)}
+              title={metricDescription[m]}
               className={`px-3 py-1.5 rounded text-sm font-semibold transition-colors duration-200 ${
                 metric === m
                   ? 'bg-yellow-500 text-black'
@@ -364,31 +371,53 @@ export default function MatchTrends({
 
           {/* Radar (pentagon) chart (1/3 width on xl) */}
           <div className="xl:col-span-1">
-            <div className="rounded-lg bg-neutral-900/60 border border-neutral-800 p-4 h-80">
-              <div className="text-neutral-300 text-sm mb-2 font-semibold">Performance Snapshot</div>
-              <ResponsiveContainer width="100%" height="80%">
-                <RadarChart data={radarData} outerRadius="80%">
-                  <PolarGrid stroke="#333" />
-                  <PolarAngleAxis dataKey="label" tick={{ fill: '#aaa', fontSize: 12 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#666', fontSize: 10 }} />
-                  <Radar
-                    name="Score"
-                    dataKey="score"
-                    stroke="#fbbf24"
-                    fill="#fbbf24"
-                    fillOpacity={0.25}
-                  />
-                  <RadarTooltip
-                    contentStyle={{ backgroundColor: '#111', border: '1px solid #333', color: '#ddd' }}
-                    formatter={((value: any, _name: any, props: any) => {
-                      // show the real average value with unit
-                      const raw = props?.payload?.raw;
-                      const unit = props?.payload?.unit ?? '';
-                      return [`${value} / 100`, `Avg: ${raw}${unit}`];
-                    }) as any}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
+            <div className="rounded-lg bg-neutral-900/60 border border-neutral-800 p-4">
+              <div className="text-neutral-300 text-sm mb-2 font-semibold">
+                Performance Snapshot
+              </div>
+
+              {/* Responsive height wrapper so labels don’t get cut on mobile */}
+              <div className="w-full h-64 sm:h-72 md:h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart
+                    data={radarData}
+                    cx="52%"          // move the chart a bit to the right
+                    cy="50%"
+                    outerRadius="60%"
+                    margin={{ top: 10, right: 24, bottom: 24, left: 48 }}
+                  >
+                    <PolarGrid stroke="#333" />
+                    <PolarAngleAxis
+                      dataKey="label"
+                      tick={{ fill: '#aaa', fontSize: 10 }}
+                    />
+                    <PolarRadiusAxis
+                      angle={30}
+                      domain={[0, 100]}
+                      tick={{ fill: '#666', fontSize: 10 }}
+                    />
+                    <Radar
+                      name="Score"
+                      dataKey="score"
+                      stroke="#fbbf24"
+                      fill="#fbbf24"
+                      fillOpacity={0.25}
+                    />
+                    <RadarTooltip
+                      contentStyle={{
+                        backgroundColor: '#111',
+                        border: '1px solid #333',
+                        color: '#ddd',
+                      }}
+                      formatter={((value: any, _name: any, props: any) => {
+                        const raw = props?.payload?.raw;
+                        const unit = props?.payload?.unit ?? '';
+                        return [`${value} / 100`, `Avg: ${raw}${unit}`];
+                      }) as any}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
 
               {/* mini legend with raw averages */}
               <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0 text-[11px] leading-tight text-neutral-400">
@@ -408,9 +437,9 @@ export default function MatchTrends({
                   Dist: <span className="text-neutral-100">{avgDistanceKm}km</span>
                 </div>
               </div>
-
             </div>
           </div>
+
         </div>
       )}
     </div>
